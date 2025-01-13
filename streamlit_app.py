@@ -88,11 +88,10 @@ def run_generation(api_key):
                 - Describe a project where you developed data analytics solutions through semantic model building. What was your approach, and what were the outcomes?"
                 """
             )
-            if not st.session_state.questions_generated:
-                response_text = model_answer(client=client, prompt=prompt_recruiter)
-                questions = re.findall(r"- (.*?)\n", response_text, re.DOTALL)
-                st.session_state.questions_generated = True
-                questions_list = [q.strip() for q in questions]
+
+            response_text = model_answer(client=client, prompt=prompt_recruiter)
+            questions = re.findall(r"- (.*?)\n", response_text, re.DOTALL)
+            questions_list = [q.strip() for q in questions]
 
             # Afficher les questions et champs de saisie
             st.subheader("Answer the following questions:")
