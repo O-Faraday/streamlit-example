@@ -142,66 +142,66 @@ def run_generation(api_key) :
                     resume_answers.append(response)
                     candidate_answers.append(candidate_answer)
 
-                    # Generate results
-                    analyse = st.button("Generate cover letter")
-                    if analyse :
-                        # Transcription de l'entretien
-                        transcription = ""
-                        for q, r_a, c_a in zip(questions_list, resume_answers, candidate_answers) :
-                            transcription += f"""QUESTION: {q}\nRESPONSE: {r_a}\n{c_a}\n\n"""
+                # Generate results
+                analyse = st.button("Generate cover letter")
+                if analyse :
+                    # Transcription de l'entretien
+                    transcription = ""
+                    for q, r_a, c_a in zip(questions_list, resume_answers, candidate_answers) :
+                        transcription += f"""QUESTION: {q}\nRESPONSE: {r_a}\n{c_a}\n\n"""
                         
-                        # Generation des ongletts
-                        tab1, tab2, tab3 = st.tabs(["Cover letter", "Evaluate candidate", "Evalute questions"])
+                    # Generation des ongletts
+                    tab1, tab2, tab3 = st.tabs(["Cover letter", "Evaluate candidate", "Evalute questions"])
 
-                        with tab1:
-                            st.header("Generate cover letter")
-                            cover_letter_prompt = f"""
-                                As a senior candidate, imagine an interview where the recruiter asks the following questions, along with your corresponding answers:  
-                                {transcription}  
+                    with tab1:
+                        st.header("Generate cover letter")
+                        cover_letter_prompt = f"""
+                            As a senior candidate, imagine an interview where the recruiter asks the following questions, along with your corresponding answers:  
+                            {transcription}  
 
-                                Additionally, you have the following resume:  
-                                {resume}  
+                             Additionally, you have the following resume:  
+                            {resume}  
 
-                                Based on this information, write a compelling and concise cover letter that highlights your suitability for the position.  
-                                The cover letter should:  
-                                - Clearly demonstrate how your skills and experiences align with the job requirements.  
-                                - Be impactful and engaging, avoiding generic or overused phrases.  
-                                - Showcase your unique value and enthusiasm for the role.  
+                            Based on this information, write a compelling and concise cover letter that highlights your suitability for the position.  
+                            The cover letter should:  
+                            - Clearly demonstrate how your skills and experiences align with the job requirements.  
+                            - Be impactful and engaging, avoiding generic or overused phrases.  
+                            - Showcase your unique value and enthusiasm for the role.  
 
-                                Focus on creating a document that will capture the recruiter's attention and set you apart as the ideal candidate.
-                                """
-                            st.write(model_answer(client=client, prompt=cover_letter_prompt))
-                        with tab2:
-                            st.header("Evaluate candidate")
-                            candidate_evaluation_prompt = f"""
-                                As a senior recruiter, imagine an interview where the recruiter asks the following questions, along with thes corresponding answers:  
-                                {transcription}  
-
-                                Additionally, you have the following job description :  
-                                {fiche_de_poste}  
-
-                                Based on this information, how would you evaluate the candidate :  
-                                - Give a numerical evaluation the candidate.  
-                                - Pro and cons of the candidacy. 
-                                - Do you think there's a need for a second interview ?
-
+                            Focus on creating a document that will capture the recruiter's attention and set you apart as the ideal candidate.
                             """
-                            st.write(model_answer(client=client, prompt=candidate_evaluation_prompt))
-                        with tab3:
-                            st.header("Evaluate questions")
-                            questions_evaluation_prompt = f"""
-                                As a senior recruiter, imagine an interview where the recruiter asks the following questions :  
-                                {transcription}  
+                        st.write(model_answer(client=client, prompt=cover_letter_prompt))
+                    with tab2:
+                        st.header("Evaluate candidate")
+                        candidate_evaluation_prompt = f"""
+                            As a senior recruiter, imagine an interview where the recruiter asks the following questions, along with thes corresponding answers:  
+                            {transcription}  
 
-                                Additionally, you have the following job description :  
-                                {fiche_de_poste}  
+                            Additionally, you have the following job description :  
+                            {fiche_de_poste}  
 
-                                Based on this information, how would you evaluate the questions :  
-                                - Give a numerical evaluation the set of questions.  
-                                - How would you improve it?
+                            Based on this information, how would you evaluate the candidate :  
+                            - Give a numerical evaluation the candidate.  
+                            - Pro and cons of the candidacy. 
+                            - Do you think there's a need for a second interview ?
 
-                            """
-                            st.write(model_answer(client=client, prompt=questions_evaluation_prompt))
+                        """
+                        st.write(model_answer(client=client, prompt=candidate_evaluation_prompt))
+                    with tab3:
+                        st.header("Evaluate questions")
+                        questions_evaluation_prompt = f"""
+                            As a senior recruiter, imagine an interview where the recruiter asks the following questions :  
+                            {transcription}  
+
+                            Additionally, you have the following job description :  
+                            {fiche_de_poste}  
+
+                            Based on this information, how would you evaluate the questions :  
+                            - Give a numerical evaluation the set of questions.  
+                            - How would you improve it?
+
+                        """
+                        st.write(model_answer(client=client, prompt=questions_evaluation_prompt))
 
         except Exception as e:
             st.error(f"Une erreur est survenue : {e}")
