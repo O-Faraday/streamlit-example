@@ -92,14 +92,14 @@ def run_generation(api_key):
                 response_text = model_answer(client=client, prompt=prompt_recruiter)
                 questions = re.findall(r"- (.*?)\n", response_text, re.DOTALL)
                 st.session_state.questions_generated = True
-                st.session_state.questions_list = [q.strip() for q in questions]
+                questions_list = [q.strip() for q in questions]
 
             # Afficher les questions et champs de saisie
             st.subheader("Answer the following questions:")
             # INTERVUEW
             resume_answers = []
             candidate_answers = []
-            for i, question in enumerate(st.questions_list):
+            for i, question in enumerate(questions_list):
                 st.write(f"**Question {i + 1}:** {question}")
                 question_prompt = f"""
                     You are an interviewer and recruitment expert analyzing a candidate's resume to answer the following question:
