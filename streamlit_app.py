@@ -116,7 +116,7 @@ def run_generation(api_key) :
                 # INTERVUEW
                 resume_answers = []
                 candidate_answers = []
-                for question in questions_list :
+                for i, question in enumerate(questions_list) :
                     question_prompt = f"""
                         You are an interviewer and recruitment expert analyzing a candidate's resume to answer the following question:
                         {question}
@@ -138,7 +138,7 @@ def run_generation(api_key) :
 
                     response, question = extract_response_and_question(model_answer(client=client, prompt=question_prompt))
     
-                    candidate_answer = st.text_input(label=question)
+                    candidate_answer = st.text_input(label=question, key=f"key_{i}")
                     resume_answers.append(response)
                     candidate_answers.append(candidate_answer)
 
