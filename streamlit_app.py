@@ -43,6 +43,18 @@ def model_answer(client, prompt):
     )
     return chat_completion.choices[0].message.content
 
+# Function to extract responses and follow-up questions
+def extract_response_and_question(text):
+
+    response_match = re.search(r"\*\*RESPONSE:\*\*\s*(.*?)\n\n", text, re.DOTALL)
+    response = response_match.group(1).strip() if response_match else "No response found"
+        
+    # Extract follow-up question
+    question_match = re.search(r"\*\*NEW_QUESTION(?:s)?:\*\*\s*(.*?)$", text, re.DOTALL)
+    question = question_match.group(1).strip() if question_match else "No follow-up question found"
+    
+    return response, question
+    
 # Interface utilisateur
 st.markdown("""
 # 📝 Interview Simulator
