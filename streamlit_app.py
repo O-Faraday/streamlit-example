@@ -140,18 +140,18 @@ def run_generation(api_key):
                 #candidate_answers.append(candidate_answer)
 
         # Bouton "Generate Cover Letter"
-        if st.button("Generate Cover Letter") :
-            st.session_state.analyse_clicked = True
-            transcription = ""
-            for q, r_a in zip(questions_list, resume_answers) : #, candidate_answers) :
-                transcription += f"""QUESTION: {q}\nRESPONSE: {r_a}\n""" #{c_a}\n\n"""
+        #if st.button("Generate Cover Letter") :
+            #st.session_state.analyse_clicked = True
+        transcription = ""
+        for q, r_a in zip(questions_list, resume_answers) : #, candidate_answers) :
+            transcription += f"""QUESTION: {q}\nRESPONSE: {r_a}\n""" #{c_a}\n\n"""
                         
-            # Generation des ongletts
-            tab1, tab2, tab3 = st.tabs(["Cover letter", "Evaluate candidate", "Evalute questions"])
+        # Generation des ongletts
+        tab1, tab2, tab3 = st.tabs(["Cover letter", "Evaluate candidate", "Evalute questions"])
 
-            with tab1:
-                st.header("Generate cover letter")
-                cover_letter_prompt = f"""
+        with tab1:
+            st.header("Generate cover letter")
+            cover_letter_prompt = f"""
                         As a senior candidate, imagine an interview where the recruiter asks the following questions, along with your corresponding answers:  
                         {transcription}  
 
@@ -166,10 +166,10 @@ def run_generation(api_key):
 
                         Focus on creating a document that will capture the recruiter's attention and set you apart as the ideal candidate.
                         """
-                st.write(model_answer(client=client, prompt=cover_letter_prompt))
-            with tab2:
-                st.header("Evaluate candidate")
-                candidate_evaluation_prompt = f"""
+            st.write(model_answer(client=client, prompt=cover_letter_prompt))
+        with tab2:
+            st.header("Evaluate candidate")
+            candidate_evaluation_prompt = f"""
                         As a senior recruiter, imagine an interview where the recruiter asks the following questions, along with thes corresponding answers:  
                         {transcription}  
 
@@ -181,12 +181,12 @@ def run_generation(api_key):
                         - Pro and cons of the candidacy. 
                         - Do you think there's a need for a second interview ?
 
-                """
-                st.write(model_answer(client=client, prompt=candidate_evaluation_prompt))
-            with tab3:
-                st.header("Evaluate questions")
-                questions_evaluation_prompt = f"""
-                    As a senior recruiter, imagine an interview where the recruiter asks the following questions :  
+            """
+            st.write(model_answer(client=client, prompt=candidate_evaluation_prompt))
+        with tab3:
+            st.header("Evaluate questions")
+            questions_evaluation_prompt = f"""
+                As a senior recruiter, imagine an interview where the recruiter asks the following questions :  
                     {transcription}  
 
                     Additionally, you have the following job description :  
@@ -196,8 +196,8 @@ def run_generation(api_key):
                      - Give a numerical evaluation the set of questions.  
                      - How would you improve it?
 
-                    """
-                st.write(model_answer(client=client, prompt=questions_evaluation_prompt))
+                """
+            st.write(model_answer(client=client, prompt=questions_evaluation_prompt))
 
 # Vérifier si la clé API est fournie
 if api_key:
