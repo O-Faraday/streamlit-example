@@ -109,7 +109,7 @@ def run_generation(api_key):
             st.subheader("Answer the following questions:")
             # INTERVUEW
             resume_answers = []
-            candidate_answers = []
+            #candidate_answers = []
             for i, question in enumerate(questions_list):
                 st.write(f"**Question {i + 1}:** {question}")
                 question_prompt = f"""
@@ -131,18 +131,20 @@ def run_generation(api_key):
                     Your goal is to extract precise answers and draft additional questions to clarify incomplete information.
                     """
 
-                response, question = extract_response_and_question(model_answer(client=client, prompt=question_prompt))
+                response, question_bis = extract_response_and_question(model_answer(client=client, prompt=question_prompt))
     
-                candidate_answer = st.text_input(label=question, key=f"key_{i}")
+                #candidate_answer = st.text_input(label=question, key=f"key_{i}")
+                st.write(question)
+                st.write(response)
                 resume_answers.append(response)
-                candidate_answers.append(candidate_answer)
+                #candidate_answers.append(candidate_answer)
 
         # Bouton "Generate Cover Letter"
         if st.button("Generate Cover Letter") :
             st.session_state.analyse_clicked = True
             transcription = ""
-            for q, r_a, c_a in zip(questions_list, resume_answers, candidate_answers) :
-                transcription += f"""QUESTION: {q}\nRESPONSE: {r_a}\n{c_a}\n\n"""
+            for q, r_a in zip(questions_list, resume_answers) : #, candidate_answers) :
+                transcription += f"""QUESTION: {q}\nRESPONSE: {r_a}\n""" #{c_a}\n\n"""
                         
             # Generation des ongletts
             tab1, tab2, tab3 = st.tabs(["Cover letter", "Evaluate candidate", "Evalute questions"])
