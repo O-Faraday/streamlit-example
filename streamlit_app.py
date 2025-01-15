@@ -82,7 +82,7 @@ def run_generation(api_key):
         resume = extract_text_from_pdf(uploaded_cv)
 
         # Bouton pour simuler l'interview
-        if st.button("Simulate Interview") or st.session_state.interview_clicked:
+        if st.button("Simulate Interview") :
             st.session_state.interview_clicked = True
 
             # Prompt pour générer les questions
@@ -138,7 +138,7 @@ def run_generation(api_key):
                 candidate_answers.append(candidate_answer)
 
         # Bouton "Generate Cover Letter"
-        if st.session_state.interview_clicked and st.button("Generate Cover Letter") or st.session_state.analyse_clicked:
+        if st.button("Generate Cover Letter") :
             st.session_state.analyse_clicked = True
             transcription = ""
             for q, r_a, c_a in zip(questions_list, resume_answers, candidate_answers) :
