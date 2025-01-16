@@ -85,7 +85,7 @@ def run_generation(api_key):
         # Bouton pour simuler l'interview
         if st.button("Simulate Interview"):
             st.session_state.interview_clicked = True
-            max_questions = 3
+            max_questions = 10
             # Prompt pour générer les questions
             prompt_recruiter = (
                 f"""As an expert recruiter, your job is to prepare an interview for the job described in the following paragraph.\n
