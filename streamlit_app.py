@@ -1,3 +1,4 @@
+# Version_1
 import streamlit as st
 from PyPDF2 import PdfReader
 from openai import OpenAI
@@ -71,7 +72,7 @@ uploaded_cv = st.file_uploader("Upload your PDF resume", type="pdf")
 fiche_de_poste = st.text_input("Job description:")
 
 # Étape 3 : Langue de la lettre de motivation
-language = st.radio("Choose cover letter language:", ["Français", "English"])
+#language = st.radio("Choose cover letter language:", ["French", "English"])
 
 # Lancement de la génération
 def run_generation(api_key):
@@ -82,36 +83,26 @@ def run_generation(api_key):
         resume = extract_text_from_pdf(uploaded_cv)
 
         # Bouton pour simuler l'interview
-        if st.button("Simulate Interview") :
+        if st.button("Simulate Interview"):
             st.session_state.interview_clicked = True
-
+            max_questions = 3
             # Prompt pour générer les questions
             prompt_recruiter = (
-                f"""As an expert recruiter, your job is to prepare a interview for the job describe in the following paragraph.\n
-                You must prepare a bunch of at max 10 questions to measure the suitability of the candidate. \n\n
+                f"""As an expert recruiter, your job is to prepare an interview for the job described in the following paragraph.\n
+                You must prepare a bunch of at max {max_questions} questions to measure the suitability of the candidate. \n\n
                 {fiche_de_poste}\n\n
                 As in the following sample  : \n
                 Based on the job description provided for the Data Engineer position at Scania, here are ten interview questions designed to assess the candidate's suitability for the role:
-
-                1. **Experience with PowerBI and Cloud Technologies:**
-                - Could you walk us through your experience with PowerBI, both on the Cloud and on Report Server? How have you used PowerBI to deliver insights and what challenges have you faced?
-
-                2. **Data Analytics Solution Development:**
-                - Describe a project where you developed data analytics solutions through semantic model building. What was your approach, and what were the outcomes?"
                 """
             )
 
             response_text = model_answer(client=client, prompt=prompt_recruiter)
             questions = re.findall(r"- (.*?)\n", response_text, re.DOTALL)
-            questions_list = [q.strip() for q in questions]
+            st.session_state.questions_list = [q.strip() for q in questions]
 
-            # Afficher les questions et champs de saisie
-            st.subheader("Answer the following questions:")
-            # INTERVUEW
-            resume_answers = []
-            #candidate_answers = []
-            for i, question in enumerate(questions_list):
-                st.write(f"**Question {i + 1}:** {question}")
+            # Calcul des réponses du résumé
+            st.session_state.resume_answers = []
+            for question in st.session_state.questions_list:
                 question_prompt = f"""
                     You are an interviewer and recruitment expert analyzing a candidate's resume to answer the following question:
                     {question}
@@ -129,75 +120,71 @@ def run_generation(api_key):
                     Question: "**NEW_QUESTION:** You have been teaching physics to which level?"
 
                     Your goal is to extract precise answers and draft additional questions to clarify incomplete information.
-                    """
+                """
+                response, _ = extract_response_and_question(model_answer(client=client, prompt=question_prompt))
+                st.session_state.resume_answers.append(response)
 
-                response, question_bis = extract_response_and_question(model_answer(client=client, prompt=question_prompt))
-    
-                #candidate_answer = st.text_input(label=question, key=f"key_{i}")
-                st.write(question)
-                st.write(response)
-                resume_answers.append(response)
-                #candidate_answers.append(candidate_answer)
+            # Initialiser les réponses des candidats dans session_state
+            st.session_state.candidate_answers = [""] * len(st.session_state.questions_list)
+
+        # Afficher les questions et champs de saisie uniquement après la génération des questions
+        if st.session_state.interview_clicked and "questions_list" in st.session_state:
+            st.subheader("Answer the following questions:")
+
+            for i, question in enumerate(st.session_state.questions_list):
+                # Conserver les réponses des utilisateurs dans session_state
+                candidate_answer = st.text_input(
+                    label=question,
+                    value=st.session_state.candidate_answers[i],
+                    key=f"key_{i}"
+                )
+                st.session_state.candidate_answers[i] = candidate_answer
 
         # Bouton "Generate Cover Letter"
-        #if st.button("Generate Cover Letter") :
-            #st.session_state.analyse_clicked = True
-        transcription = ""
-        for q, r_a in zip(questions_list, resume_answers) : #, candidate_answers) :
-            transcription += f"""QUESTION: {q}\nRESPONSE: {r_a}\n""" #{c_a}\n\n"""
-                        
-        # Generation des ongletts
-        tab1, tab2, tab3 = st.tabs(["Cover letter", "Evaluate candidate", "Evalute questions"])
+        if st.button("Generate Cover Letter"):
+            transcription = ""
+            for q, r_a, c_a in zip(
+                st.session_state.questions_list,
+                st.session_state.resume_answers,
+                st.session_state.candidate_answers,
+            ):
+                transcription += f"""QUESTION: {q}\nRESPONSE: {r_a}\nCANDIDATE: {c_a}\n\n"""
 
-        with tab1:
-            st.header("Generate cover letter")
-            cover_letter_prompt = f"""
-                        As a senior candidate, imagine an interview where the recruiter asks the following questions, along with your corresponding answers:  
-                        {transcription}  
+            # Génération des onglets
+            tab1, tab2, tab3 = st.tabs(["Cover letter", "Evaluate candidate", "Evaluate questions"])
 
-                        Additionally, you have the following resume:  
-                        {resume}  
-
-                        Based on this information, write a compelling and concise cover letter that highlights your suitability for the position.  
-                        The cover letter should:  
-                        - Clearly demonstrate how your skills and experiences align with the job requirements.  
-                        - Be impactful and engaging, avoiding generic or overused phrases.  
-                        - Showcase your unique value and enthusiasm for the role.  
-
-                        Focus on creating a document that will capture the recruiter's attention and set you apart as the ideal candidate.
-                        """
-            st.write(model_answer(client=client, prompt=cover_letter_prompt))
-        with tab2:
-            st.header("Evaluate candidate")
-            candidate_evaluation_prompt = f"""
-                        As a senior recruiter, imagine an interview where the recruiter asks the following questions, along with thes corresponding answers:  
-                        {transcription}  
-
-                        Additionally, you have the following job description :  
-                        {fiche_de_poste}  
-
-                        Based on this information, how would you evaluate the candidate :  
-                        - Give a numerical evaluation the candidate.  
-                        - Pro and cons of the candidacy. 
-                        - Do you think there's a need for a second interview ?
-
-            """
-            st.write(model_answer(client=client, prompt=candidate_evaluation_prompt))
-        with tab3:
-            st.header("Evaluate questions")
-            questions_evaluation_prompt = f"""
-                As a senior recruiter, imagine an interview where the recruiter asks the following questions :  
+            with tab1:
+                st.header("Generate cover letter")
+                cover_letter_prompt = f"""
+                    As a senior candidate, imagine an interview where the recruiter asks the following questions, along with your corresponding answers:  
                     {transcription}  
 
-                    Additionally, you have the following job description :  
-                    {fiche_de_poste}  
+                    Additionally, you have the following resume:  
+                    {resume}  
 
-                    Based on this information, how would you evaluate the questions :  
-                     - Give a numerical evaluation the set of questions.  
-                     - How would you improve it?
+                    Based on this information, write a compelling and concise cover letter that highlights your suitability for the position.  
+                    """
+                st.write(model_answer(client=client, prompt=cover_letter_prompt))
 
-                """
-            st.write(model_answer(client=client, prompt=questions_evaluation_prompt))
+            with tab2:
+                st.header("Evaluate candidate")
+                candidate_evaluation_prompt = f"""
+                    Based on this information, how would you evaluate the candidate:
+                    {transcription}  
+                    """
+                st.write(model_answer(client=client, prompt=candidate_evaluation_prompt))
+
+            with tab3:
+                st.header("Evaluate questions")
+                questions_evaluation_prompt = f"""
+                    Based on the following questions:
+                    {transcription}  
+
+                    How would you improve it?
+                    """
+                st.write(model_answer(client=client, prompt=questions_evaluation_prompt))
+
+ 
 
 # Vérifier si la clé API est fournie
 if api_key:
